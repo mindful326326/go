@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuteyou</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* 全局样式 */
+        :root {
+            --primary-color: #FF69B4;  /* 粉色主色调 */
+            --secondary-color: #9C27B0;  /* 紫色辅助色 */
+            --accent-color: #FF1493;  /* 亮粉色强调色 */
+            --gradient-start: #FF69B4;
+            --gradient-end: #9C27B0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* 添加全局动画效果 */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin: 20px 0;
+            font-weight: 800;
+            color: white;
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: unset;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: float 3s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+            -webkit-text-stroke: none;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            margin: 15px 0;
+            line-height: 1.6;
+            font-weight: 300;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto;
+            aspect-ratio: 1;
+            visibility: hidden;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .main-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            transform: scale(1.05);
+        }
+
+        .main-image.visible {
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .upload-btn {
+            display: block;
+            background: linear-gradient(45deg, var(--accent-color), var(--secondary-color));
+            color: white;
+            padding: 18px 0;
+            width: 100%;
+            border: none;
+            border-radius: 15px;
+            font-size: 22px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 25px 0;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+        }
+
+        .upload-text {
+            font-size: 16px;
+            margin-top: 15px;
+            color: rgba(255,255,255,0.9);
+            font-weight: 300;
+        }
+
+        /* 添加加载动画 */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        /* 添加响应式设计 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 36px;
+            }
+
+            .subtitle {
+                font-size: 18px;
+            }
+
+            .upload-btn {
+                font-size: 18px;
+                padding: 15px 0;
+            }
+        }
+
+        /* 修改文件输入框的样式，完全隐藏它 */
+        #file-input {
+            display: none;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
+        /* 结果区域样式 */
+        #result-container {
+            margin-top: 30px;
+        }
+
+        .loading-spinner {
+            margin: 20px auto;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        .loading-text {
+            margin-top: 15px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .result-image {
+            max-width: 300px;
+            border-radius: 20px;
+            margin: 20px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .download-btn {
+            background: white;
+            color: var(--accent-color);
+        }
+
+        .share-btn {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cuteyou</h1>
+        <p class="subtitle">Make you 3D cute photo<br>Make our Make your life sweeter
+            </p>
+        
+        <div class="slideshow-container">
+            <img src="images/trump1.jpg" alt="Sample" class="main-image fade">
+            <img src="images/trump2.jpg" alt="Sample" class="main-image fade">
+            <img src="images/trump3.jpg" alt="Sample" class="main-image fade">
+        </div>
+        
+        <input type="file" id="file-input" accept="image/*">
+        <label for="file-input" class="upload-btn">
+            TRY IT NOW
+        </label>
+        
+        <p class="upload-text">👆Upload your photo to get started</p>
+
+        <div id="result-container" style="display: none;">
+            <div class="loading-spinner" style="display: none;">
+                <div class="spinner"></div>
+                <p class="loading-text">Creating your Trump style image...</p>
+            </div>
+            <div class="result-content" style="display: none;">
+                <img id="result-image" class="result-image" alt="Generated Image">
+                <div class="result-buttons">
+                    <button class="btn download-btn">Download</button>
+                    <button class="btn share-btn">Share</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'dcceaef356d84b61b7c9d9d3c3d44005';
+        const APP_ID = '1824336493758054401';
+        const VERSION_ID = '1824336493762248705';
+        const API_BASE_URL = 'https://a1.art';
+
+        const fileInput = document.getElementById('file-input');
+
+        // 第一步：上传图片到服务器
+        async function uploadImage(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/open-api/v1/a1/images/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'apiKey': API_KEY
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                console.log('Upload response:', data);
+
+                if (data.code === 0) {
+                    return data.data;
+                } else {
+                    throw new Error(data.msg || '上传失败');
+                }
+            } catch (error) {
+                console.error('Upload failed:', error);
+                throw error;
+            }
+        }
+
+        // 第二步：使用上传的图片生成新图片
+        async function generateImage(uploadResult) {
+            try {
+                const params = {
+                    appId: APP_ID,
+                    versionId: VERSION_ID,
+                    description: [],
+                    size: {
+                        sizeId: "2"
+                    },
+                    cnet: [{
+                        id: "1723791001131",
+                        imageUrl: uploadResult.imageUrl,
+                        path: uploadResult.path
+                    }],
+                    video: [],
+                    generateNum: 1
+                };
+
+                console.log('Generate params:', params);
+
+                const response = await fetch(`${API_BASE_URL}/open-api/v1/a1/images/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'apiKey': API_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(params)
+                });
+
+                const data = await response.json();
+                console.log('Generate response:', data);
+
+                if (data.code === 0) {
+                    return data.data.taskId;
+                } else {
+                    throw new Error(data.msg || '生成失败');
+                }
+            } catch (error) {
+                console.error('Generation failed:', error);
+                throw error;
+            }
+        }
+
+        // 处理文件选择
+        fileInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                try {
+                    // 验证文件
+                    if (!file.type.startsWith('image/')) {
+                        throw new Error('Please select an image file');
+                    }
+
+                    if (file.size > 10 * 1024 * 1024) {
+                        throw new Error('File size too large (max 10MB)');
+                    }
+
+                    // 显示加载界面
+                    const resultContainer = document.getElementById('result-container');
+                    const loadingSpinner = resultContainer.querySelector('.loading-spinner');
+                    const resultContent = resultContainer.querySelector('.result-content');
+
+                    resultContainer.style.display = 'block';
+                    loadingSpinner.style.display = 'block';
+                    resultContent.style.display = 'none';
+
+                    // 上传图片
+                    console.log('Starting upload...');
+                    const uploadResult = await uploadImage(file);
+
+                    // 生成新图片
+                    console.log('Starting generation...');
+                    const taskId = await generateImage(uploadResult);
+                    console.log('Task ID:', taskId);
+
+                    // 轮询检查任务状态
+                    const checkStatus = async () => {
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/open-api/v1/a1/tasks/${taskId}`, {
+                                headers: { 'apiKey': API_KEY }
+                            });
+                            const data = await response.json();
+
+                            if (data.code === 0) {
+                                if (data.data.state === 10) { // 任务完成
+                                    loadingSpinner.style.display = 'none';
+                                    resultContent.style.display = 'block';
+                                    
+                                    const resultImage = document.getElementById('result-image');
+                                    resultImage.src = data.data.images[0];
+
+                                    // 修改下载按钮功能的代码部分
+                                    // 在 checkStatus 函数中找到这部分代码并替换：
+
+                                    // 添加下载按钮功能
+                                    document.querySelector('.download-btn').onclick = async () => {
+                                        try {
+                                            // 获取图片URL
+                                            const imageUrl = data.data.images[0];
+                                            
+                                            // 使用fetch获取图片数据
+                                            const response = await fetch(imageUrl);
+                                            const blob = await response.blob();
+                                            
+                                            // 创建下载链接
+                                            const downloadUrl = window.URL.createObjectURL(blob);
+                                            const link = document.createElement('a');
+                                            link.href = downloadUrl;
+                                            link.download = 'trump-style.jpg'; // 设置下载文件名
+                                            
+                                            // 添加到文档并触发点击
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            
+                                            // 清理
+                                            document.body.removeChild(link);
+                                            window.URL.revokeObjectURL(downloadUrl);
+                                        } catch (error) {
+                                            console.error('Download failed:', error);
+                                            alert('Download failed. Please try again.');
+                                        }
+                                    };
+
+                                    // 添加分享按钮功能
+                                    document.querySelector('.share-btn').onclick = async () => {
+                                        try {
+                                            await navigator.share({
+                                                title: 'My Trump Style Photo',
+                                                text: 'Check out my Trump style photo!',
+                                                url: data.data.images[0]
+                                            });
+                                        } catch (err) {
+                                            console.log('Share failed:', err);
+                                        }
+                                    };
+                                } else if (data.data.state === 20) { // 任务失败
+                                    throw new Error('Generation failed');
+                                } else { // 继续等待
+                                    setTimeout(checkStatus, 2000);
+                                }
+                            } else {
+                                throw new Error(data.msg || '检查状态失败');
+                            }
+                        } catch (error) {
+                            console.error('Check status failed:', error);
+                            loadingSpinner.style.display = 'none';
+                            alert('Error: ' + error.message);
+                        }
+                    };
+
+                    checkStatus();
+                } catch (error) {
+                    console.error('Process failed:', error);
+                    alert('Error: ' + error.message);
+                }
+            }
+        });
+
+        // 轮播相关代码
+        function startSlideshow() {
+            const slideshow = document.querySelector('.slideshow-container');
+            const slides = document.getElementsByClassName("main-image");
+            let currentSlide = 0;
+
+            // 初始化：确保所有图片都是隐藏的
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.opacity = "0";
+                slides[i].classList.remove('visible');
+            }
+            
+            // 准备第一张图片
+            slides[0].classList.add('visible');
+            slides[0].style.opacity = "1";
+            
+            // 显示轮播容器
+            slideshow.style.visibility = 'visible';
+
+            // 定时切换图片
+            setInterval(() => {
+                // 隐藏当前图片
+                slides[currentSlide].style.opacity = "0";
+                
+                // 移动到下一张图片
+                currentSlide = (currentSlide + 1) % slides.length;
+                
+                // 确保下一张图片可见性设置正确
+                slides[currentSlide].classList.add('visible');
+                slides[currentSlide].style.opacity = "1";
+                
+                // 移除上一张图片的可见性
+                setTimeout(() => {
+                    slides[(currentSlide - 1 + slides.length) % slides.length].classList.remove('visible');
+                }, 200); // 等待过渡完成后移除
+            }, 2000);
+        }
+
+        // 预加载图片
+        function preloadImages() {
+            return new Promise((resolve) => {
+                const images = document.getElementsByClassName("main-image");
+                let loadedImages = 0;
+
+                function imageLoaded() {
+                    loadedImages++;
+                    if (loadedImages === images.length) {
+                        resolve();
+                    }
+                }
+
+                for (let img of images) {
+                    if (img.complete) {
+                        imageLoaded();
+                    } else {
+                        img.addEventListener('load', imageLoaded);
+                    }
+                    img.addEventListener('error', imageLoaded); // 处理加载失败的情况
+                }
+            });
+        }
+
+        // 页面加载完成后的处理
+        window.addEventListener('load', async () => {
+            await preloadImages();
+            startSlideshow();
+        });
+    </script>
+</body>
+</html>
